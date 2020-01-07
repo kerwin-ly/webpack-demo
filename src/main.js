@@ -1,16 +1,22 @@
-import './assets/index.less';
-import './images/bg.jpg';
+// import './assets/index.less';
+// import './images/bg.jpg';
 
-const list = [{
-  name: 'kerwin',
-  age: 23
-}, {
-  name: 'bob',
-  age: 25
-}];
+// const list = [{
+//   name: 'kerwin',
+//   age: 23
+// }, {
+//   name: 'bob',
+//   age: 25
+// }];
 
-for (let value of list) {
-  console.log(value.keys());
-}
+// for (let value of list) {
+//   console.log(value.keys());
+// }
 
-console.log('test webpack');
+// console.log('test webpack');
+import Vue from 'vue';
+import App from './app';
+
+new Vue({
+  render: h => h(App)
+}).$mount('#app');

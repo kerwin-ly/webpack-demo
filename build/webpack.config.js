@@ -3,11 +3,13 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin"); // 将生成的js注入到html中，同时可配置多入口文件
 const { CleanWebpackPlugin } = require("clean-webpack-plugin"); // 清除多余的文件
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const VueLoaderPlugin = require("vue-loader/lib/plugin");
+const Webpack = require("webpack");
+const devMode = process.argv.indexOf("--mode=production") === -1; // 判断是否为开发环境打包
 
 module.exports = {
-  mode: "development", // 开发模式
   entry: {
-    main: ['@babel/polyfill', path.resolve(__dirname, "../src/main.js")], // main 入口文件,babel-polyfill将新的api转换为es5相关语法实现(如Generator, Promise等)
+    main: ["@babel/polyfill", path.resolve(__dirname, "../src/main.js")], // main 入口文件,babel-polyfill将新的api转换为es5相关语法实现(如Generator, Promise等)
     header: path.resolve(__dirname, "../src/header.js") // header 入口文件
   },
   output: {
@@ -17,33 +19,69 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.vue$/,
+        use: ["vue-loader"],
+        include: [path.resolve(__dirname, '../src')], // 只在src目录下进行查找转换
+        exclude: /node_modules/ // 排除node_modules查找
+      },
+      {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"] // 从右向左解析原则
-      },
-      {
-        test: /\.js$/,
-        use: [{
-          loader: 'babel-loader', // 将es6,es7的新语法转换为es5语法
-          options: {
-            presets: ['@babel/preset-env']
-          }
-        }],
-        exclude: /node-modules/
-      },
-      {
-        test: /\.less$/,
+        // use: ["style-loader", "css-loader"] // 从右向左解析原则
         use: [
-          MiniCssExtractPlugin.loader, // 将js中的css单独提取到某css文件中（类似webpack4之前的extract-text-webpack-plugin）
-          // "style-loader", // 将生成的css通过style标签注入到html中
+          {
+            loader: devMode ? "vue-style-loader" : MiniCssExtractPlugin,
+            options: {
+              publicPath: "../dist/css",
+              hmr: devMode
+            }
+          },
           "css-loader",
           {
             loader: "postcss-loader",
             options: {
               plugins: [require("autoprefixer")]
             }
+          }
+        ],
+        include: [path.resolve(__dirname, '../src/assets')], // 只在src/assets目录下进行查找转换
+        exclude: /node_modules/ // 排除node_modules查找
+      },
+      {
+        test: /\.less$/,
+        use: [
+          {
+            loader: devMode ? "vue-style-loader" : MiniCssExtractPlugin,
+            options: {
+              publicPath: "../dist/css",
+              hmr: devMode
+            }
           },
-          "less-loader"
-        ] // 从右向左解析原则
+          // MiniCssExtractPlugin.loader, // 将js中的css单独提取到某css文件中（类似webpack4之前的extract-text-webpack-plugin）
+          // "style-loader", // 将生成的css通过style标签注入到html中
+          "css-loader",
+          "less-loader",
+          {
+            loader: "postcss-loader",
+            options: {
+              plugins: [require("autoprefixer")]
+            }
+          }
+        ], // 从右向左解析原则
+        include: [path.resolve(__dirname, '../src')], // 只在src目录下进行查找转换,vue文件中可能也有less scope
+        exclude: /node_modules/ // 排除node_modules查找
+      },
+      {
+        test: /\.js$/,
+        use: [
+          {
+            loader: "babel-loader", // 将es6,es7的新语法转换为es5语法
+            options: {
+              presets: ["@babel/preset-env"]
+            }
+          }
+        ],
+        include: [path.resolve(__dirname, '../src')], // 只在src目录下进行查找转换
+        exclude: /node-modules/
       },
       {
         test: /\.(jpe?g|png|gif)$/i, // 图片文件
@@ -60,7 +98,9 @@ module.exports = {
               }
             }
           }
-        ]
+        ],
+        include: [path.resolve(__dirname, '../src/assets/images')],
+        exclude: /node-modules/
       },
       {
         test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/, // 媒体文件
@@ -77,7 +117,9 @@ module.exports = {
               }
             }
           }
-        ]
+        ],
+        include: [path.resolve(__dirname, '../src/assets/media')],
+        exclude: /node-modules/
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/i, // 字体
@@ -94,9 +136,23 @@ module.exports = {
               }
             }
           }
-        ]
+        ],
+        include: [path.resolve(__dirname, '../src/assets/fonts')],
+        exclude: /node-modules/
       }
     ]
+  },
+  resolve: {
+    alias: {
+      vue$: "vue/dist/vue.runtime.esm.js",
+      " @": path.resolve(__dirname, "../src")
+    },
+    extensions: ["*", ".js", ".json", ".vue"]
+  },
+  devServer: {
+    port: 3000,
+    hot: true,
+    contentBase: "../dist"
   },
   plugins: [
     new CleanWebpackPlugin(), // 默认删除<PROJECT_DIR>/dist/文件夹
@@ -112,8 +168,10 @@ module.exports = {
       chunks: ["header"] // 与入口文件对应的模块名
     }),
     new MiniCssExtractPlugin({
-      filename: "[name].[hash].css",
-      chunkFilename: "[id].css"
-    })
+      filename: devMode ? "[name].css" : "[name].[hash].css",
+      chunkFilename: devMode ? "[id].css" : "[id].[hash].css"
+    }),
+    new VueLoaderPlugin(),
+    new Webpack.HotModuleReplacementPlugin()
   ]
 };
