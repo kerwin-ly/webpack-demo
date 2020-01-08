@@ -16,6 +16,7 @@
 // console.log('test webpack');
 import Vue from 'vue';
 import App from './app';
+import './assets/css/index.less';
 
 new Vue({
   render: h => h(App)

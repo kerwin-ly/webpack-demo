@@ -1,11 +1,17 @@
 // webpack.config.js
 const path = require("path");
+const os = require('os');
 const HtmlWebpackPlugin = require("html-webpack-plugin"); // 将生成的js注入到html中，同时可配置多入口文件
 const { CleanWebpackPlugin } = require("clean-webpack-plugin"); // 清除多余的文件
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const Webpack = require("webpack");
-const devMode = process.argv.indexOf("--mode=production") === -1; // 判断是否为开发环境打包
+const HappyPack = require('happypack');
+// const CopyWebpackPlugin = require("copy-webpack-plugin");
+
+const devMode = process.env.NODE_ENV === 'development'; // 判断是否为开发环境打包
+
+const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 
 module.exports = {
   entry: {
@@ -13,8 +19,8 @@ module.exports = {
     header: path.resolve(__dirname, "../src/header.js") // header 入口文件
   },
   output: {
-    filename: "[name].[hash:8].js", // 打包后的文件名称
-    path: path.resolve(__dirname, "../dist") // 打包后的目录
+    path: path.resolve(__dirname, "../dist"), // 打包后的目录
+    filename: "static/js/[name].[hash:8].js" // 打包后的文件名称
   },
   module: {
     rules: [
@@ -29,7 +35,7 @@ module.exports = {
         // use: ["style-loader", "css-loader"] // 从右向左解析原则
         use: [
           {
-            loader: devMode ? "vue-style-loader" : MiniCssExtractPlugin,
+            loader: devMode ? "vue-style-loader" : MiniCssExtractPlugin.loader,
             options: {
               publicPath: "../dist/css",
               hmr: devMode
@@ -50,7 +56,7 @@ module.exports = {
         test: /\.less$/,
         use: [
           {
-            loader: devMode ? "vue-style-loader" : MiniCssExtractPlugin,
+            loader: devMode ? "vue-style-loader" : MiniCssExtractPlugin.loader,
             options: {
               publicPath: "../dist/css",
               hmr: devMode
@@ -74,10 +80,11 @@ module.exports = {
         test: /\.js$/,
         use: [
           {
-            loader: "babel-loader", // 将es6,es7的新语法转换为es5语法
-            options: {
-              presets: ["@babel/preset-env"]
-            }
+            // loader: ["babel-loader"], // 将es6,es7的新语法转换为es5语法
+            // options: {
+            //   presets: ["@babel/preset-env"]
+            // }
+            loader: 'happypack/loader?id=happyBabel'
           }
         ],
         include: [path.resolve(__dirname, '../src')], // 只在src目录下进行查找转换
@@ -149,12 +156,20 @@ module.exports = {
     },
     extensions: ["*", ".js", ".json", ".vue"]
   },
-  devServer: {
-    port: 3000,
-    hot: true,
-    contentBase: "../dist"
-  },
   plugins: [
+    new HappyPack({
+      id: 'happyBabel', // 与loader对应的id标识
+      loaders: [{
+        loader: 'babel-loader',
+        options: {
+          presets: [
+            ["@babel/preset-env", { modules: false }] // modules: false
+          ],
+          cacheDirectory: true
+        }
+      }],
+      threadPool: happyThreadPool // 进程池
+    }),
     new CleanWebpackPlugin(), // 默认删除<PROJECT_DIR>/dist/文件夹
     // 多文件入口
     new HtmlWebpackPlugin({
@@ -168,10 +183,17 @@ module.exports = {
       chunks: ["header"] // 与入口文件对应的模块名
     }),
     new MiniCssExtractPlugin({
-      filename: devMode ? "[name].css" : "[name].[hash].css",
-      chunkFilename: devMode ? "[id].css" : "[id].[hash].css"
+      filename: devMode ? "static/css/[name].css" : "static/css/[name].[hash].css",
+      chunkFilename: devMode ? "static/css/[id].css" : "static/css/[id].[hash].css"
     }),
     new VueLoaderPlugin(),
-    new Webpack.HotModuleReplacementPlugin()
+    new Webpack.HotModuleReplacementPlugin(),
+    // new Webpack.DllReferencePlugin({
+    //   context: __dirname,
+    //   manifest: require('./vendor-manifest.json')
+    // }),
+    // new CopyWebpackPlugin([ // 拷贝生成的文件到dist目录 这样每次不必手动去cv
+    //   {from: '../static', to:'../dist/static'}
+    // ])
   ]
 };
