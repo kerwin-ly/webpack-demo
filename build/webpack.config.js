@@ -7,6 +7,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const Webpack = require("webpack");
 const HappyPack = require('happypack');
+const RemoveLogPlugin = require('./removeLogPlugin');
 // const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 const devMode = process.env.NODE_ENV === 'development'; // 判断是否为开发环境打包
@@ -188,6 +189,7 @@ module.exports = {
     }),
     new VueLoaderPlugin(),
     new Webpack.HotModuleReplacementPlugin(),
+    new RemoveLogPlugin()
     // new Webpack.DllReferencePlugin({
     //   context: __dirname,
     //   manifest: require('./vendor-manifest.json')

@@ -8,21 +8,25 @@
 export default {
   data() {
     return {
-      desc: 'vue demo'
-    }
-  }
-}
+      desc: 'vue demo',
+    };
+  },
+  mounted() {
+    console.log('123');
+    console.log('233');
+  },
+};
 </script>
 
 <style lang="less" scoped>
-  .wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
-    h2 {
-      color: green;
-    }
+  h2 {
+    color: green;
   }
+}
 </style>
