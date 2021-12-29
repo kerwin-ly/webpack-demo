@@ -8,7 +8,7 @@ class RemoveLogPlugin {
       Object.keys(compilation.assets).forEach((filename) => {
         if (filename.endsWith('.js')) {
           let content = compilation.assets[filename].source(); // 获取filename里的代码
-          content = content.replace(/console.log\(['|"](.*?)['|"]\)/g, '');
+          content = content.replace(/console.log\((.*?)\)/g, '');
           compilation.assets[filename] = {
             source: () => {
               return content;
