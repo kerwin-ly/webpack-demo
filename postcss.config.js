@@ -1,3 +1,10 @@
 module.exports = {
-  plugins: [require('autoprefixer')] // 引用‘自动添加浏览器前缀’插件
-}
+  plugins: [
+    require('autoprefixer'),
+    require('postcss-pxtorem')({
+      rootValue: 15,
+      selectorBlackList: [], // 忽略转换正则匹配项
+      propList: ['*'],
+    }),
+  ],
+};

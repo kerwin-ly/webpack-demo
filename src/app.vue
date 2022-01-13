@@ -27,6 +27,7 @@ export default {
   align-items: center;
 
   h2 {
+    font-size: 20px;
     color: green;
   }
 }
