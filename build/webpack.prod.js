@@ -6,6 +6,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 // const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const ParallelUglifyPlugin = require("webpack-parallel-uglify-plugin");
+const ZipPlugin = require("./zipPlugin");
 
 process.env.NODE_ENV = "production";
 
@@ -19,6 +20,9 @@ module.exports = WebpackMerge(webpackConfig, {
         to: path.resolve(__dirname, "../dist"),
       },
     ]),
+    new ZipPlugin({
+      filename: "offline", // 压缩包名称
+    }),
   ],
   optimization: {
     minimizer: [
