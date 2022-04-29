@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import text from "./assets/txt/demo.txt";
 export default {
   data() {
     return {
@@ -12,9 +13,7 @@ export default {
     };
   },
   mounted() {
-    console.log('123');
-    console.log('233');
-    console.log(111);
+    console.log(text); // 使用raw-loader直接访问txt文件内容
   },
 };
 </script>

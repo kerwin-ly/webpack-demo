@@ -1,0 +1,16 @@
+
+   
+{
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "name is valid, and must be a string"
+    },
+    "basePath": {
+      "type": "string",
+      "description": "basePath is valid, and must be a string"
+    }
+  },
+  "type": "object"
+}

@@ -14,10 +14,11 @@
 // }
 
 // console.log('test webpack');
-import Vue from 'vue';
-import App from './app';
-import './assets/css/index.less';
+import Vue from "vue";
+import App from "./app";
+import "./assets/css/index.less";
+// import { bar } from "./bar";
 
 new Vue({
-  render: h => h(App)
-}).$mount('#app');
+  render: (h) => h(App),
+}).$mount("#app");
