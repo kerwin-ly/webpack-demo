@@ -18,7 +18,10 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="less" >
+.test123 {
+  color: #fff;
+}
 .wrapper {
   display: flex;
   flex-direction: column;

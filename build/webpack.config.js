@@ -70,16 +70,37 @@ module.exports = {
         test: /\.js$/,
         use: [
           {
-            // loader: ["babel-loader"], // 将es6,es7的新语法转换为es5语法
-            // options: {
-            //   presets: ["@babel/preset-env"]
-            // }
-            loader: "happypack/loader?id=happyBabel",
+            loader: "thread-loader",
+            options: {
+              workers: os.cpus().length,
+            },
+          },
+          {
+            loader: "babel-loader", // 将es6,es7的新语法转换为es5语法
+            options: {
+              presets: ["@babel/preset-env"],
+              cacheDirectory: true,
+            },
           },
         ],
         include: [path.resolve(__dirname, "../src")], // 只在src目录下进行查找转换
         exclude: /node-modules/,
       },
+      // // happypack用法
+      // {
+      //   test: /\.js$/,
+      //   use: [
+      //     {
+      //       // loader: ["babel-loader"], // 将es6,es7的新语法转换为es5语法
+      //       // options: {
+      //       //   presets: ["@babel/preset-env"]
+      //       // }
+      //       loader: "happypack/loader?id=happyBabel",
+      //     },
+      //   ],
+      //   include: [path.resolve(__dirname, "../src")], // 只在src目录下进行查找转换
+      //   exclude: /node-modules/,
+      // },
       {
         test: /\.(jpe?g|png|gif)$/i, // 图片文件
         use: [
@@ -95,8 +116,31 @@ module.exports = {
               },
             },
           },
+          {
+            loader: "image-webpack-loader",
+            options: {
+              mozjpeg: {
+                progressive: true,
+              },
+              // optipng.enabled: false will disable optipng
+              optipng: {
+                enabled: false,
+              },
+              pngquant: {
+                quality: [0.65, 0.9],
+                speed: 4,
+              },
+              gifsicle: {
+                interlaced: false,
+              },
+              // the webp option will enable WEBP
+              webp: {
+                quality: 75,
+              },
+            },
+          },
         ],
-        include: [path.resolve(__dirname, "../src/assets/images")],
+        // include: [path.resolve(__dirname, "../src/assets/img")],
         exclude: /node-modules/,
       },
       {
@@ -161,21 +205,22 @@ module.exports = {
     extensions: ["*", ".js", ".json", ".vue"],
   },
   plugins: [
-    new HappyPack({
-      id: "happyBabel", // 与loader对应的id标识
-      loaders: [
-        {
-          loader: "babel-loader",
-          options: {
-            presets: [
-              ["@babel/preset-env", { modules: false }], // modules: false
-            ],
-            cacheDirectory: true,
-          },
-        },
-      ],
-      threadPool: happyThreadPool, // 进程池
-    }),
+    // happypack 用法
+    // new HappyPack({
+    //   id: "happyBabel", // 与loader对应的id标识
+    //   loaders: [
+    //     {
+    //       loader: "babel-loader",
+    //       options: {
+    //         presets: [
+    //           ["@babel/preset-env", { modules: false }], // modules: false
+    //         ],
+    //         cacheDirectory: true,
+    //       },
+    //     },
+    //   ],
+    //   threadPool: happyThreadPool, // 进程池
+    // }),
     new CleanWebpackPlugin(), // 默认删除<PROJECT_DIR>/dist/文件夹
     // 多文件入口
     new HtmlWebpackPlugin({

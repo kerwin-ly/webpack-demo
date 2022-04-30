@@ -17,7 +17,9 @@
 import Vue from "vue";
 import App from "./app";
 import "./assets/css/index.less";
-// import { bar } from "./bar";
+import { bar } from "./bar";
+
+console.log(bar);
 
 new Vue({
   render: (h) => h(App),
